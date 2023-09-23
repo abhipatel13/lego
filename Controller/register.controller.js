@@ -1,0 +1,38 @@
+// controllers/registerController.js
+const { RegisterModel } = require('../Model/register.model');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken'); // Import the jsonwebtoken library
+
+exports.registerUser = async (req, res) => {
+    try {
+        const { name, dateofbirth, username, email, password } = req.body;
+
+        // Check if the username or email already exists
+        const existingUser = await RegisterModel.findOne({ $or: [{ username }, { email }] });
+
+        if (existingUser) {
+            return res.status(400).json({ error: 'Username or email already exists' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = new RegisterModel({
+            name,
+            dateofbirth,
+            username,
+            email,
+            password: hashedPassword,
+        });
+
+        await user.save();
+
+        // Create a JWT token for the newly registered user
+        const token = jwt.sign({ userId: user._id, email: user.email }, '12121saas'); // Replace with your actual JWT secret key
+
+        res.status(201).json({ message: 'User registered successfully', token, id: user._id });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
