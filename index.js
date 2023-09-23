@@ -7,13 +7,14 @@ const connection = require("./Config/db");
 const registerRoutes = require("./Router/register.router");
 const signInRoute = require("./Router/signin.router");
 const contactUsRouter = require("./Router/contactus.router");
-
+const userRouter = require("./Router/user.router");
 
 app.use(cors());
 app.use(express.json());
 app.use('/register', registerRoutes);
 app.use("/signin",signInRoute);
 app.use("/contactus",contactUsRouter)
+app.use("/user-profile",userRouter)
 
 app.listen(port, async() => {
     try {
